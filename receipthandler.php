@@ -75,9 +75,9 @@ class receipthandler {
         $receiptsecret = $this->generate_receipt_secret($receipt->nonce);
         $receiptbody = implode('', array_slice($arrayofbytes, 0, 26));
         $receipthmac = implode('', array_slice($arrayofbytes, 26, 32));
-        $calculatedhmac = base64_encode(hash_hmac('sha256', $receiptbody, $receiptsecret, true));
+        $calculatedhmac = hash_hmac('sha256', $receiptbody, $receiptsecret, true);
 
-        if ($receipthmac !== $calculatedhmac) {
+        if ($receipthmac != $calculatedhmac) {
             throw new receiptexception('hmac verification failed');
         }
 
