@@ -29,7 +29,7 @@ class receipthandler {
      */
     private const RECEIPT_SECRET_GENERATION_STRING = 'receipt_secret';
 
-    public function __construct(string $receiptseed) {
+    public function __construct(?string $receiptseed = null) {
         $this->receiptseed = $receiptseed;
     }
 
@@ -45,6 +45,7 @@ class receipthandler {
     /**
      * Parses out the information from a stream receipt conforming to:
      * https://interledger.org/rfcs/0039-stream-receipts/
+     *
      * @param string $binaryreceipt
      * @return receipt
      * @throws receiptexception
@@ -72,15 +73,41 @@ class receipthandler {
         $receipt->streamid = bindec(array_slice($arrayofbinarybytes, 17, 1)[0]);
         $receipt->totalreceived = bindec(implode('', array_slice($arrayofbinarybytes, 18, 8)));
 
-        $receiptsecret = $this->generate_receipt_secret($receipt->nonce);
+        return $receipt;
+    }
+
+    /**
+     * Parses out the information from a stream receipt conforming to:
+     * https://interledger.org/rfcs/0039-stream-receipts/
+     *
+     * @param string $binaryreceipt
+     * @return receipt
+     * @throws receiptexception
+     */
+    public function verify_hmac(string $binaryreceipt): bool {
+        $arrayofbytes = str_split($binaryreceipt);
+
+        if (count($arrayofbytes) !== 58) {
+            throw new receiptexception('incorrect size');
+        }
+
+        $arrayofbinarybytes = [];
+        foreach ($arrayofbytes as $byte) {
+            $arrayofbinarybytes[] = sprintf("%08b", ord($byte));
+        }
+
+        $nonce = implode('', array_slice($arrayofbytes, 1, 16));
         $receiptbody = implode('', array_slice($arrayofbytes, 0, 26));
         $receipthmac = implode('', array_slice($arrayofbytes, 26, 32));
+
+        $receiptsecret = $this->generate_receipt_secret($nonce);
+
         $calculatedhmac = hash_hmac('sha256', $receiptbody, $receiptsecret, true);
 
         if ($receipthmac != $calculatedhmac) {
-            throw new receiptexception('hmac verification failed');
+            return false;
         }
 
-        return $receipt;
+        return true;
     }
 }
