@@ -1,7 +1,7 @@
 ## interledgerPHP
 
 A PHP library to work with the interledger protocol suite.
-The only functionality provided so far is to work with [STREAM Receipts](https://interledger.org/rfcs/0039-stream-receipts/)
+The only functionality provided so far is to work with [STREAM Receipts](https://interledger.org/rfcs/0029-stream/)
 
 This library was started to support the development of a [webmonetization](https://webmonetization.org/docs/explainer) plugin for [Moodle](https://moodle.org/) which can be found here [here](https://github.com/andrewhancox/moodle-local_webmonetization)
 
